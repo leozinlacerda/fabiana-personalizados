@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "@/lib/localStorage";
+import { loginUser } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +33,7 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const user = loginUser(email, password);
+      const user = await loginUser(email, password);
       
       if (user) {
         toast({

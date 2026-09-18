@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginUser } from "@/lib/localStorage";
+import { loginUser } from "@/lib/db";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ArrowLeft } from "lucide-react";
 
@@ -21,9 +21,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const email = username.includes('@') ? username : `${username}@fabiana.com`;
-      
-      const user = loginUser(email, password);
+      const user = await loginUser(username, password);
 
       if (user) {
         refreshUser();

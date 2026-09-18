@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getCurrentUser, isAdmin as checkIsAdmin, initializeDefaultData, migrateBase64Images, User } from '@/lib/localStorage';
+import { getCurrentUser, isAdmin as checkIsAdmin } from '@/lib/db';
+type User = any;
 
 interface AuthContextType {
   user: User | null;
@@ -22,22 +23,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const refreshUser = () => {
-    const currentUser = getCurrentUser();
+  const refreshUser = async () => {
+    const currentUser = await getCurrentUser();
     setUser(currentUser);
-    setIsAdmin(checkIsAdmin());
+    setIsAdmin(await checkIsAdmin());
   };
 
   useEffect(() => {
-    // Inicializar dados padrão
-    initializeDefaultData();
-    
-    // Migrar imagens base64 existentes para IndexedDB
-    migrateBase64Images().catch(() => {});
-    
-    // Verificar sessão existente
-    refreshUser();
-    setLoading(false);
+    refreshUser().finally(() => setLoading(false));
+    const { data: { subscription } } = (() => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { supabase } = require('@/integrations/supabase/client');
+        return supabase.auth.onAuthStateChange(() => refreshUser());
+      } catch { return { data: { subscription: { unsubscribe: () => {} } } }; }
+    })();
+    return () => subscription.unsubscribe();
   }, []);
 
   return (

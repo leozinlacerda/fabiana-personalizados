@@ -334,22 +334,59 @@ export async function uploadImage(file: File): Promise<string> {
   return uploadToImageKit(file);
 }
 
-// ==================== AUTH (Supabase) ====================
+// ==================== AUTH (Supabase + admin_users fallback) ====================
 export async function getCurrentUser() {
+  // Tenta Supabase Auth primeiro
   const { data } = await supabase.auth.getUser();
-  return data.user;
+  if (data.user) return data.user;
+  // Fallback: localStorage admin_users (para login admin/admin sem Auth)
+  const local = localStorage.getItem('fabiana_admin_session');
+  if (local) {
+    try { return JSON.parse(local); } catch { return null; }
+  }
+  return null;
 }
 export async function isAdmin(): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-  const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
-  return !!data;
+  if (user) {
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
+    if (data) return true;
+  }
+  // Fallback admin_users session
+  const local = localStorage.getItem('fabiana_admin_session');
+  if (local) {
+    try { const u = JSON.parse(local); return u?.username === 'admin' || u?.email === 'admin@fabiana.com'; } catch { return false; }
+  }
+  return false;
 }
-export async function loginUser(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  return data.user;
+export async function loginUser(emailOrUsername: string, password: string) {
+  // 1) Tenta Supabase Auth (email)
+  const email = emailOrUsername.includes('@') ? emailOrUsername : `${emailOrUsername}@fabiana.com`;
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error && data.user) return data.user;
+  } catch { /* tenta fallback */ }
+
+  // 2) Fallback: verifica tabela admin_users (login admin/admin)
+  const { data: admin, error: adminErr } = await supabase.from('admin_users').select('*').or(`username.eq.${emailOrUsername},email.eq.${email}`).maybeSingle();
+  if (!adminErr && admin && admin.password === password) {
+    const fakeUser = { id: admin.id, email: admin.email, username: admin.username, full_name: 'Administrador' } as any;
+    localStorage.setItem('fabiana_admin_session', JSON.stringify(fakeUser));
+    return fakeUser;
+  }
+
+  // 3) Fallback local hardcoded admin/admin (se ainda não migrou)
+  if ((emailOrUsername === 'admin' || email === 'admin@fabiana.com') && password === 'admin') {
+    const fakeUser = { id: 'admin-id', email: 'admin@fabiana.com', username: 'admin', full_name: 'Administrador' } as any;
+    localStorage.setItem('fabiana_admin_session', JSON.stringify(fakeUser));
+    return fakeUser;
+  }
+
+  throw new Error('Usuário ou senha inválidos');
 }
 export async function logoutUser() {
   await supabase.auth.signOut();
+  localStorage.removeItem('fabiana_admin_session');
 }
+export function initializeDefaultData() { /* compat: não precisa com Supabase */ }
+export async function migrateBase64Images() { /* compat */ }
