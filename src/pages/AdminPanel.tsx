@@ -62,6 +62,7 @@ import {
   InstitutionalBlock,
 } from "@/lib/db";
 import { TestConnections } from "@/components/TestConnections";
+import { deleteFromImageKit } from "@/lib/imagekit";
 
 const AdminPanel = () => {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -326,6 +327,7 @@ const AdminPanel = () => {
     if (editingProduct) {
       const existingImages = await getProductImagesByProductId(editingProduct);
       if (index < existingImages.length) {
+        try { await deleteFromImageKit(existingImages[index].image_url); } catch {}
         await deleteProductImage(existingImages[index].id);
       }
     }
@@ -502,12 +504,18 @@ const AdminPanel = () => {
   };
 
   const handleDeleteProduct = async (id: string) => {
+    try {
+      const imgs = await getProductImagesByProductId(id);
+      for (const img of imgs) { try { await deleteFromImageKit(img.image_url); } catch {} }
+    } catch {}
     await deleteProduct(id);
     toast({ title: "Produto excluído!" });
     await loadData();
   };
 
   const handleDeleteCategory = async (id: string) => {
+    const cat = categories.find(c => c.id === id);
+    if (cat?.image_url && cat.image_url.startsWith('http')) { try { await deleteFromImageKit(cat.image_url); } catch {} }
     await deleteCategory(id);
     toast({ title: "Categoria excluída!" });
     await loadData();
@@ -649,6 +657,8 @@ const AdminPanel = () => {
   };
 
   const handleDeleteCarouselImage = async (id: string) => {
+    const img = carouselImages.find(c => c.id === id);
+    if (img?.image_url) { try { await deleteFromImageKit(img.image_url); } catch {} }
     await deleteCarouselImage(id);
     toast({ title: "Imagem excluída!" });
     await loadData();

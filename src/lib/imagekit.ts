@@ -76,7 +76,42 @@ export async function uploadToImageKit(file: File, folder: string = "/fabiana"):
   throw new Error("Configure Edge Function upload-imagekit ou defina IMAGEKIT_PRIVATE_KEY para modo DEV");
 }
 
-// Helper para deletar (requer private key - faça via Edge Function)
-export async function deleteFromImageKit(fileId: string): Promise<void> {
-  console.warn("Delete ImageKit deve ser feito via backend com private key. fileId:", fileId);
+// Helper para deletar no ImageKit (via Edge Function ou fallback DEV com private key)
+export async function deleteFromImageKit(imageUrlOrFileId: string): Promise<void> {
+  if (!imageUrlOrFileId) return;
+  const isUrl = imageUrlOrFileId.startsWith('http');
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+  // Tenta via Edge Function primeiro
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/delete-imagekit`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(isUrl ? { imageUrl: imageUrlOrFileId } : { fileId: imageUrlOrFileId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.success) return;
+    // se falhou, tenta fallback
+    if (!res.ok) throw new Error(data.error || 'Edge Function falhou');
+  } catch (_) {
+    // fallback DEV com private key exposta (só local)
+    const priv = (import.meta.env.VITE_IMAGEKIT_PRIVATE_KEY || (import.meta.env as any).IMAGEKIT_PRIVATE_KEY) as string | undefined;
+    if (!priv) { console.warn('ImageKit delete ignorado - sem Edge Function e sem private key', imageUrlOrFileId); return; }
+    try {
+      const auth = btoa(`${priv}:`);
+      let fileId = isUrl ? null : imageUrlOrFileId;
+      if (isUrl) {
+        const fileName = imageUrlOrFileId.split('/').pop()?.split('?')[0]!;
+        const searchRes = await fetch(`https://api.imagekit.io/v1/files?searchQuery=name="${encodeURIComponent(fileName)}"`, {
+          headers: { Authorization: `Basic ${auth}` },
+        });
+        const files = await searchRes.json();
+        const found = Array.isArray(files) ? files[0] : null;
+        fileId = found?.fileId;
+        if (!fileId) { console.warn('Arquivo não encontrado para deletar', imageUrlOrFileId); return; }
+      }
+      await fetch(`https://api.imagekit.io/v1/files/${fileId}`, { method: "DELETE", headers: { Authorization: `Basic ${auth}` } });
+    } catch (e) { console.warn('Falha delete fallback', e); }
+  }
 }
