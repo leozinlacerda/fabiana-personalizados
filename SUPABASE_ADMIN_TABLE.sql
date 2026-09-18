@@ -23,15 +23,10 @@ DROP POLICY IF EXISTS "Admins can manage admins" ON public.admin_users;
 CREATE POLICY "Admins can manage admins" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
 -- NOTA: Para produção restrinja: USING (auth.jwt() ->> 'email' = 'admin@fabiana.com')
 
--- 2) Inserir admin padrão (ignora se já existe)
+-- 2) Inserir admin padrão (ignora se já existe) - só 1 linha, login aceita admin ou admin@fabiana.com via OR na query
 INSERT INTO public.admin_users (username, email, password)
 VALUES ('admin', 'admin@fabiana.com', 'admin')
 ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password, email = EXCLUDED.email;
-
--- Também permite login com email
-INSERT INTO public.admin_users (username, email, password)
-VALUES ('admin@fabiana.com', 'admin@fabiana.com', 'admin')
-ON CONFLICT (username) DO NOTHING;
 
 -- 3) Garantir usuário no Supabase Auth + role admin (para RLS das outras tabelas)
 -- Cria usuário via auth.users se não existir (senha será 'admin' - hash bcrypt gerado pelo Supabase)
