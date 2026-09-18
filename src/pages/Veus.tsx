@@ -17,7 +17,7 @@ import {
   getProductImagesByProductId,
   Product,
   Category,
-} from "@/lib/localStorage";
+} from "@/lib/db";
 
 interface ProductWithImages extends Product {
   secondImage?: string | null;
@@ -41,19 +41,19 @@ const Veus = () => {
   }, []);
 
   const loadProducts = async () => {
-    const data = getProducts();
-    const productsWithImages = data.map((product) => {
-      const images = getProductImagesByProductId(product.id);
+    const data = await getProducts();
+    const productsWithImages = await Promise.all(data.map(async (product) => {
+      const images = await getProductImagesByProductId(product.id);
       return {
         ...product,
         secondImage: images.length > 1 ? images[1].image_url : null,
       };
-    });
+    }));
     setProducts(productsWithImages);
   };
 
-  const loadCategories = () => {
-    const data = getCategories();
+  const loadCategories = async () => {
+    const data = await getCategories();
     setCategories(data);
   };
 

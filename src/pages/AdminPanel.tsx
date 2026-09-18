@@ -61,7 +61,7 @@ import {
   CarouselImage,
   InstitutionalBlock,
 } from "@/lib/localStorage";
-import { getImageFromIDB, getMultipleImagesFromIDB } from "@/lib/imageStorage";
+import { TestConnections } from "@/components/TestConnections";
 
 const AdminPanel = () => {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -837,6 +837,7 @@ const AdminPanel = () => {
             <TabsTrigger value="carousel" className="flex-1 text-xs sm:text-sm min-w-0">Carrossel</TabsTrigger>
             <TabsTrigger value="institutional" className="flex-1 text-xs sm:text-sm min-w-0">Blocos</TabsTrigger>
             <TabsTrigger value="settings" className="flex-1 text-xs sm:text-sm min-w-0">Personalizar</TabsTrigger>
+            <TabsTrigger value="teste" className="flex-1 text-xs sm:text-sm min-w-0 bg-yellow-100 data-[state=active]:bg-yellow-200">Teste Conexão</TabsTrigger>
           </TabsList>
 
           {/* PRODUTOS */}
@@ -2029,8 +2030,8 @@ const AdminPanel = () => {
               </div>
 
               <Button 
-                onClick={() => {
-                  updateSiteSettings(siteSettings);
+                onClick={async () => {
+                  await updateSiteSettings(siteSettings);
                   toast({ title: "Configurações salvas!" });
                 }} 
                 disabled={loading}
@@ -2040,6 +2041,11 @@ const AdminPanel = () => {
                 Salvar Configurações
               </Button>
             </div>
+          </TabsContent>
+
+          {/* TESTE CONEXÃO */}
+          <TabsContent value="teste" className="space-y-4">
+            <TestConnections />
           </TabsContent>
         </Tabs>
       </div>

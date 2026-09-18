@@ -10,8 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronUp, ChevronDown, Plus, Minus, Truck, CreditCard, Share2, Facebook, Twitter, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getProductById, getProductImagesByProductId, getSiteSettings, getProducts, Product, ProductImage, SiteSettings } from "@/lib/localStorage";
-import { getMultipleImagesFromIDB } from "@/lib/imageStorage";
+import { getProductById, getProductImagesByProductId, getSiteSettings, getProducts, Product, ProductImage, SiteSettings } from "@/lib/db";
 import Lightbox from "@/components/Lightbox";
 
 const ProductDetail = () => {
@@ -33,7 +32,7 @@ const ProductDetail = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
-    setSiteSettings(getSiteSettings());
+    getSiteSettings().then(setSiteSettings);
     if (id) {
       loadProduct();
     }
@@ -42,7 +41,7 @@ const ProductDetail = () => {
   const loadProduct = async () => {
     if (!id) return;
     
-    const productData = getProductById(id);
+    const productData = await getProductById(id);
     
     if (!productData) {
       toast({
@@ -55,24 +54,23 @@ const ProductDetail = () => {
     }
 
     setProduct(productData);
-    const images = getProductImagesByProductId(id);
+    const images = await getProductImagesByProductId(id);
     setProductImages(images);
     
     const allIds = images.length > 0
       ? images.sort((a, b) => a.display_order - b.display_order).map(img => img.image_url)
       : (productData.image_url ? [productData.image_url] : []);
 
-    const resolvedUrls = await getMultipleImagesFromIDB(allIds);
-    setImageUrls(resolvedUrls);
+    setImageUrls(allIds);
     
-    if (resolvedUrls.length > 0) {
+    if (allIds.length > 0) {
       setSelectedImage(allIds[0]);
       setSelectedImageIndex(0);
     } else {
       setSelectedImage("");
     }
 
-    const allProducts = getProducts();
+    const allProducts = await getProducts();
     const related = allProducts
       .filter(p => p.id !== id && p.category_id === productData.category_id)
       .slice(0, 8);

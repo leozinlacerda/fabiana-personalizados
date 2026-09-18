@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getCategoriesByType, Category } from "@/lib/localStorage";
+import { getCategoriesByType, Category } from "@/lib/db";
 import { useImageUrl } from "@/hooks/use-image-url";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -38,7 +38,7 @@ const CategoryRail = () => {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
-    setCategories(getCategoriesByType('rail'));
+    getCategoriesByType('rail').then(setCategories);
   }, []);
 
   useEffect(() => {

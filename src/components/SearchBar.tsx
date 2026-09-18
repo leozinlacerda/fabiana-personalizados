@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Product, getProductImagesByProductId } from "@/lib/localStorage";
-import { getImageFromIDB } from "@/lib/imageStorage";
+import { Product } from "@/lib/db";
 
 interface SearchBarProps {
   products: Product[];
@@ -17,7 +16,7 @@ const SearchBar = ({ products, onClose }: SearchBarProps) => {
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -74,33 +73,7 @@ const SearchBar = ({ products, onClose }: SearchBarProps) => {
     }
   };
 
-  const getProductImage = (product: Product) => {
-    const images = getProductImagesByProductId(product.id);
-    const imageId = images.length > 0 ? images[0].image_url : product.image_url;
-    if (!imageId) return "";
-    return imageUrls[imageId] || "";
-  };
-
-  useEffect(() => {
-    if (filtered.length === 0) return;
-    let cancelled = false;
-    const loadImages = async () => {
-      for (const product of filtered) {
-        if (imageUrls[product.image_url]) continue;
-        const images = getProductImagesByProductId(product.id);
-        const imageId = images.length > 0 ? images[0].image_url : product.image_url;
-        if (!imageId || imageUrls[imageId]) continue;
-        try {
-          const url = await getImageFromIDB(imageId);
-          if (!cancelled && url) {
-            setImageUrls(prev => ({ ...prev, [imageId]: url }));
-          }
-        } catch { /* ignore */ }
-      }
-    };
-    loadImages();
-    return () => { cancelled = true; };
-  }, [query]);
+  const getProductImage = (product: Product) => product.image_url || "";
 
   const formatPrice = (value: number) =>
     `R$ ${value.toFixed(2).replace(".", ",")}`;

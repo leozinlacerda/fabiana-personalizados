@@ -1,18 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { getCarouselImages, CarouselImage } from "@/lib/localStorage";
-import { getMultipleImagesFromIDB } from "@/lib/imageStorage";
+import { getCarouselImages, CarouselImage } from "@/lib/db";
 
 const HeroCarousel = () => {
   const [images, setImages] = useState<CarouselImage[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [api, setApi] = useState<any>(null);
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    const loaded = getCarouselImages();
-    setImages(loaded);
-    getMultipleImagesFromIDB(loaded.map(img => img.image_url)).then(setImageUrls);
+    getCarouselImages().then(setImages);
   }, []);
 
   useEffect(() => {
@@ -65,14 +61,14 @@ const HeroCarousel = () => {
         className="w-full"
       >
         <CarouselContent>
-          {images.map((image, index) => (
+          {images.map((image) => (
             <CarouselItem key={image.id}>
               <div
                 className={`relative w-full h-[30vh] sm:h-[50vh] md:h-[70vh] max-h-[600px] overflow-hidden ${image.link_url ? "cursor-pointer" : ""}`}
                 onClick={() => handleClick(image.link_url)}
               >
                 <img
-                  src={imageUrls[index] || ""}
+                  src={image.image_url || ""}
                   alt={image.title || "Banner"}
                   className="absolute inset-0 w-full h-full object-cover"
                 />

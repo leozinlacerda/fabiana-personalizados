@@ -1,12 +1,12 @@
 import { NavLink } from "@/components/NavLink";
-import { getSiteSettings, SiteSettings } from "@/lib/localStorage";
+import { getSiteSettings, SiteSettings } from "@/lib/db";
 import { useState, useEffect } from "react";
 
 const Footer = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
-    setSettings(getSiteSettings());
+    getSiteSettings().then(setSettings);
   }, []);
 
   return (

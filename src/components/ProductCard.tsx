@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSiteSettings, SiteSettings } from "@/lib/localStorage";
+import { getSiteSettings, SiteSettings } from "@/lib/db";
 import { useImageUrl } from "@/hooks/use-image-url";
 
 interface ProductCardProps {
@@ -18,7 +18,7 @@ const ProductCard = ({ title, image, secondImage, price, maxInstallments = 10 }:
   const secondUrl = useImageUrl(secondImage);
 
   useEffect(() => {
-    setSettings(getSiteSettings());
+    getSiteSettings().then(setSettings);
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener("resize", check);

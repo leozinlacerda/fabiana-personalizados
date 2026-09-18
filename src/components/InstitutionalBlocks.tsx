@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getInstitutionalBlocks, InstitutionalBlock } from "@/lib/localStorage";
-import { getMultipleImagesFromIDB } from "@/lib/imageStorage";
+import { getInstitutionalBlocks, InstitutionalBlock } from "@/lib/db";
 
 const InstitutionalBlocks = () => {
   const [blocks, setBlocks] = useState<InstitutionalBlock[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
-    const loaded = getInstitutionalBlocks().slice(0, 2);
-    setBlocks(loaded);
-    getMultipleImagesFromIDB(loaded.map(b => b.image_url)).then(setImageUrls);
+    getInstitutionalBlocks().then(loaded => setBlocks(loaded.slice(0, 2)));
   }, []);
 
   if (blocks.length === 0) return null;
@@ -18,15 +14,15 @@ const InstitutionalBlocks = () => {
   return (
     <section className="w-full">
       <div className={`grid grid-cols-1 md:grid-cols-2 w-full gap-0`}>
-        {blocks.map((block, index) => (
+        {blocks.map((block) => (
           <Link
             key={block.id}
             to={block.link_url || "#"}
             className="relative group overflow-hidden aspect-[4/3] sm:aspect-[16/9] w-full"
           >
-            {imageUrls[index] ? (
+            {block.image_url ? (
               <img
-                src={imageUrls[index]}
+                src={block.image_url}
                 alt={block.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />

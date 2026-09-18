@@ -3,7 +3,7 @@ import { Search, User, ShoppingCart, LogOut, Menu, Settings } from "lucide-react
 import { NavLink } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { logoutUser, getCategories, getProducts, Category, Product } from "@/lib/localStorage";
+import { logoutUser, getCategories, getProducts, Category, Product } from "@/lib/db";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
@@ -20,8 +20,8 @@ const Header = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    setCategories(getCategories());
-    setAllProducts(getProducts());
+    getCategories().then(setCategories);
+    getProducts().then(setAllProducts);
   }, []);
 
   const handleUserClick = () => {

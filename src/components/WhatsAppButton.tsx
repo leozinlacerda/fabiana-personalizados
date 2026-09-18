@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { getSiteSettings, SiteSettings } from "@/lib/localStorage";
+import { getSiteSettings, SiteSettings } from "@/lib/db";
 
 const WhatsAppButton = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
-    setSettings(getSiteSettings());
+    getSiteSettings().then(setSettings);
   }, []);
 
   if (!settings || !settings.whatsapp_number || settings.whatsapp_number.trim() === "") {

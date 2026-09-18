@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { NavLink } from "@/components/NavLink";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getSiteSettings, getProductImagesByProductId, Product, SiteSettings } from "@/lib/localStorage";
+import { getProducts, getSiteSettings, getProductImagesByProductId, Product, SiteSettings } from "@/lib/db";
 
 interface ProductWithImages extends Product {
   secondImage?: string | null;
@@ -24,21 +24,20 @@ const Home = () => {
     loadSettings();
   }, []);
 
-  const loadProducts = () => {
-    const data = getProducts().slice(0, 6);
-    // Fetch images for each product
-    const productsWithImages = data.map(product => {
-      const images = getProductImagesByProductId(product.id);
+  const loadProducts = async () => {
+    const data = (await getProducts()).slice(0, 6);
+    const productsWithImages = await Promise.all(data.map(async product => {
+      const images = await getProductImagesByProductId(product.id);
       return {
         ...product,
         secondImage: images.length > 1 ? images[1].image_url : null,
       };
-    });
+    }));
     setProducts(productsWithImages);
   };
 
-  const loadSettings = () => {
-    setSettings(getSiteSettings());
+  const loadSettings = async () => {
+    setSettings(await getSiteSettings());
   };
 
   const handleProductClick = (productId: string) => {
