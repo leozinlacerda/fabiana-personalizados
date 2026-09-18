@@ -24,12 +24,13 @@ const AdminLogin = () => {
       const user = await loginUser(username, password);
 
       if (user) {
-        refreshUser();
+        await refreshUser();
         toast({
           title: "Login realizado!",
           description: "Bem-vindo ao painel administrativo",
         });
-        navigate("/admin");
+        // aguarda isAdmin propagar antes de navegar
+        setTimeout(() => navigate("/admin"), 100);
       } else {
         toast({
           title: "Acesso negado",
