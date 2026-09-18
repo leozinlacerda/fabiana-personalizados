@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Product, Category } from "@/lib/localStorage";
+import { Product, Category } from "@/lib/db";
 
 interface FilterState {
   selectedCategories: string[];

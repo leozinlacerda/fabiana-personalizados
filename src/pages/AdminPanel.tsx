@@ -60,7 +60,7 @@ import {
   SiteSettings,
   CarouselImage,
   InstitutionalBlock,
-} from "@/lib/localStorage";
+} from "@/lib/db";
 import { TestConnections } from "@/components/TestConnections";
 
 const AdminPanel = () => {
@@ -161,52 +161,42 @@ const AdminPanel = () => {
 
   const loadData = async () => {
     try {
-      const loadedProducts = getProducts();
+      const [loadedProducts, loadedCategories, loadedCoupons, loadedSettings, loadedCarousel, loadedBlocks] = await Promise.all([
+        getProducts(),
+        getCategories(),
+        getCoupons(),
+        getSiteSettings(),
+        getCarouselImages(),
+        getInstitutionalBlocks(),
+      ]);
       setProducts(loadedProducts);
-      setCategories(getCategories());
-      setCoupons(getCoupons());
-      setSiteSettings(getSiteSettings());
-
-      const loadedCarousel = getCarouselImages();
+      setCategories(loadedCategories);
+      setCoupons(loadedCoupons);
+      setSiteSettings(loadedSettings);
       setCarouselImages(loadedCarousel);
-
-      const loadedBlocks = getInstitutionalBlocks();
       setInstitutionalBlocks(loadedBlocks);
 
+      // Imagens agora são URLs diretas do ImageKit, sem IDB
       const thumbnailUrls: Record<string, string> = {};
       for (const p of loadedProducts) {
-        if (p.image_url && !p.image_url.startsWith('data:') && !p.image_url.startsWith('blob:')) {
-          try {
-            const url = await getImageFromIDB(p.image_url);
-            if (url) thumbnailUrls[p.image_url] = url;
-          } catch { /* imagem não encontrada no IDB */ }
-        }
+        if (p.image_url) thumbnailUrls[p.image_url] = p.image_url;
       }
       setProductThumbnailUrls(thumbnailUrls);
 
       const cUrls: Record<string, string> = {};
       for (const img of loadedCarousel) {
-        if (img.image_url && !img.image_url.startsWith('data:') && !img.image_url.startsWith('blob:')) {
-          try {
-            const url = await getImageFromIDB(img.image_url);
-            if (url) cUrls[img.image_url] = url;
-          } catch { /* ignore */ }
-        }
+        if (img.image_url) cUrls[img.image_url] = img.image_url;
       }
       setCarouselThumbnailUrls(cUrls);
 
       const bUrls: Record<string, string> = {};
       for (const b of loadedBlocks) {
-        if (b.image_url && !b.image_url.startsWith('data:') && !b.image_url.startsWith('blob:')) {
-          try {
-            const url = await getImageFromIDB(b.image_url);
-            if (url) bUrls[b.image_url] = url;
-          } catch { /* ignore */ }
-        }
+        if (b.image_url) bUrls[b.image_url] = b.image_url;
       }
       setBlockThumbnailUrls(bUrls);
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
+      toast({ title: "Erro ao carregar dados", description: (err as any).message, variant: "destructive" });
     }
   };
 
@@ -238,29 +228,30 @@ const AdminPanel = () => {
           updates.image_url = uploadedImageUrls[0];
         }
 
-        updateProduct(editingProduct, updates);
+        await updateProduct(editingProduct, updates);
 
         // Add new images
         if (uploadedImageUrls.length > 0) {
-          uploadedImageUrls.forEach((url, index) => {
-            addProductImage({
+          for (let index = 0; index < uploadedImageUrls.length; index++) {
+            const url = uploadedImageUrls[index];
+            await addProductImage({
               product_id: editingProduct,
               image_url: url,
               display_order: imageIds.length + index,
             });
-          });
+          }
         }
 
         // Save the image order based on the current previews
         if (imageIds.length > 0) {
-          updateProductImageOrder(imageIds);
+          await updateProductImageOrder(imageIds);
         }
 
         toast({ title: "Produto atualizado!" });
         setEditingProduct(null);
         setEditProductDialogOpen(false);
       } else {
-        const newProduct = addProduct({
+        const newProduct = await addProduct({
           name: productForm.name,
           description: productForm.description,
           price: parseFloat(productForm.price),
@@ -271,13 +262,14 @@ const AdminPanel = () => {
         });
 
         if (uploadedImageUrls.length > 0) {
-          uploadedImageUrls.forEach((url, index) => {
-            addProductImage({
+          for (let index = 0; index < uploadedImageUrls.length; index++) {
+            const url = uploadedImageUrls[index];
+            await addProductImage({
               product_id: newProduct.id,
               image_url: url,
               display_order: index,
             });
-          });
+          }
         }
 
         toast({ title: "Produto adicionado!" });
@@ -287,7 +279,7 @@ const AdminPanel = () => {
       setImagePreviews([]);
       setImageIds([]);
       setExistingImageKeys([]);
-      loadData();
+      await loadData();
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
@@ -306,10 +298,9 @@ const AdminPanel = () => {
       sizes: product.sizes || [],
       images: [],
     });
-    const existingImages = getProductImagesByProductId(product.id);
+    const existingImages = await getProductImagesByProductId(product.id);
     const keys = existingImages.map(img => img.image_url);
-    const resolvedUrls = await getMultipleImagesFromIDB(keys);
-    setImagePreviews(resolvedUrls);
+    setImagePreviews(keys);
     setImageIds(existingImages.map(img => img.id));
     setExistingImageKeys(keys);
     setEditProductDialogOpen(true);
@@ -333,9 +324,9 @@ const AdminPanel = () => {
 
   const handleRemoveImage = async (index: number) => {
     if (editingProduct) {
-      const existingImages = getProductImagesByProductId(editingProduct);
+      const existingImages = await getProductImagesByProductId(editingProduct);
       if (index < existingImages.length) {
-        deleteProductImage(existingImages[index].id);
+        await deleteProductImage(existingImages[index].id);
       }
     }
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
@@ -349,13 +340,13 @@ const AdminPanel = () => {
 
     if (editingProduct) {
       if (newKeys.length > 0) {
-        updateProduct(editingProduct, { image_url: newKeys[0] });
+        await updateProduct(editingProduct, { image_url: newKeys[0] });
       } else {
-        updateProduct(editingProduct, { image_url: null });
+        await updateProduct(editingProduct, { image_url: null });
       }
     }
 
-    loadData();
+    await loadData();
   };
 
   const handleImageDragStart = (e: React.DragEvent, index: number) => {
@@ -433,17 +424,17 @@ const AdminPanel = () => {
       const currentEditingId = editingCategory;
 
       if (currentEditingId) {
-        updateCategory(currentEditingId, categoryData);
+        await updateCategory(currentEditingId, categoryData);
         toast({ title: "Categoria atualizada!" });
         setEditingCategory(null);
         setEditCategoryDialogOpen(false);
       } else {
-        addCategory(categoryData);
+        await addCategory(categoryData);
         toast({ title: "Categoria adicionada!" });
       }
 
       setCategoryForm({ name: "", slug: "", link_url: "", image_url: "", type: categoryForm.type });
-      loadData();
+      await loadData();
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
@@ -469,7 +460,7 @@ const AdminPanel = () => {
 
     try {
       if (editingCoupon) {
-        updateCoupon(editingCoupon, {
+        await updateCoupon(editingCoupon, {
           code: couponForm.code.toUpperCase(),
           discount_percentage: parseInt(couponForm.discount_percentage),
           expires_at: new Date(couponForm.expires_at).toISOString(),
@@ -477,7 +468,7 @@ const AdminPanel = () => {
         toast({ title: "Cupom atualizado!" });
         setEditingCoupon(null);
       } else {
-        addCoupon({
+        await addCoupon({
           code: couponForm.code.toUpperCase(),
           discount_percentage: parseInt(couponForm.discount_percentage),
           expires_at: new Date(couponForm.expires_at).toISOString(),
@@ -486,7 +477,7 @@ const AdminPanel = () => {
       }
 
       setCouponForm({ code: "", discount_percentage: "", expires_at: "" });
-      loadData();
+      await loadData();
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
@@ -510,19 +501,19 @@ const AdminPanel = () => {
     setCouponForm({ code: "", discount_percentage: "", expires_at: "" });
   };
 
-  const handleDeleteProduct = (id: string) => {
-    deleteProduct(id);
+  const handleDeleteProduct = async (id: string) => {
+    await deleteProduct(id);
     toast({ title: "Produto excluído!" });
-    loadData();
+    await loadData();
   };
 
-  const handleDeleteCategory = (id: string) => {
-    deleteCategory(id);
+  const handleDeleteCategory = async (id: string) => {
+    await deleteCategory(id);
     toast({ title: "Categoria excluída!" });
-    loadData();
+    await loadData();
   };
 
-  const handleMoveCategoryUp = (categoryId: string) => {
+  const handleMoveCategoryUp = async (categoryId: string) => {
     const categoryIds = categories.map(c => c.id);
     const index = categoryIds.indexOf(categoryId);
     if (index <= 0) return;
@@ -530,12 +521,12 @@ const AdminPanel = () => {
     // Swap with previous
     [categoryIds[index - 1], categoryIds[index]] = [categoryIds[index], categoryIds[index - 1]];
     
-    updateCategoryPositions(categoryIds);
-    loadData();
+    await updateCategoryPositions(categoryIds);
+    await loadData();
     toast({ title: "Ordem atualizada!" });
   };
 
-  const handleMoveCategoryDown = (categoryId: string) => {
+  const handleMoveCategoryDown = async (categoryId: string) => {
     const categoryIds = categories.map(c => c.id);
     const index = categoryIds.indexOf(categoryId);
     if (index === -1 || index >= categoryIds.length - 1) return;
@@ -543,8 +534,8 @@ const AdminPanel = () => {
     // Swap with next
     [categoryIds[index], categoryIds[index + 1]] = [categoryIds[index + 1], categoryIds[index]];
     
-    updateCategoryPositions(categoryIds);
-    loadData();
+    await updateCategoryPositions(categoryIds);
+    await loadData();
     toast({ title: "Ordem atualizada!" });
   };
 
@@ -558,7 +549,7 @@ const AdminPanel = () => {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, targetCategoryId: string) => {
+  const handleDrop = async (e: React.DragEvent, targetCategoryId: string) => {
     e.preventDefault();
     
     if (!draggedCategory || draggedCategory === targetCategoryId) {
@@ -578,8 +569,8 @@ const AdminPanel = () => {
     categoryIds.splice(draggedIndex, 1);
     categoryIds.splice(targetIndex, 0, draggedCategory);
 
-    updateCategoryPositions(categoryIds);
-    loadData();
+    await updateCategoryPositions(categoryIds);
+    await loadData();
     setDraggedCategory(null);
     toast({ title: "Ordem atualizada!" });
   };
@@ -588,10 +579,10 @@ const AdminPanel = () => {
     setDraggedCategory(null);
   };
 
-  const handleDeleteCoupon = (id: string) => {
-    deleteCoupon(id);
+  const handleDeleteCoupon = async (id: string) => {
+    await deleteCoupon(id);
     toast({ title: "Cupom excluído!" });
-    loadData();
+    await loadData();
   };
 
   // ==================== CAROUSEL HANDLERS ====================
@@ -614,7 +605,7 @@ const AdminPanel = () => {
       }
 
       if (editingCarouselImage) {
-        updateCarouselImage(editingCarouselImage, {
+        await updateCarouselImage(editingCarouselImage, {
           image_url: imageUrl,
           title: carouselForm.title,
           link_url: carouselForm.link_url,
@@ -622,7 +613,7 @@ const AdminPanel = () => {
         toast({ title: "Imagem atualizada!" });
         setEditingCarouselImage(null);
       } else {
-        addCarouselImage({
+        await addCarouselImage({
           image_url: imageUrl,
           title: carouselForm.title,
           link_url: carouselForm.link_url,
@@ -633,7 +624,7 @@ const AdminPanel = () => {
 
       setCarouselForm({ title: "", link_url: "", image: null });
       setCarouselImagePreview(null);
-      loadData();
+      await loadData();
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
@@ -648,8 +639,7 @@ const AdminPanel = () => {
       link_url: image.link_url || "",
       image: null,
     });
-    const url = await getImageFromIDB(image.image_url);
-    setCarouselImagePreview(url || image.image_url);
+    setCarouselImagePreview(image.image_url);
   };
 
   const handleCancelEditCarouselImage = () => {
@@ -658,10 +648,10 @@ const AdminPanel = () => {
     setCarouselImagePreview(null);
   };
 
-  const handleDeleteCarouselImage = (id: string) => {
-    deleteCarouselImage(id);
+  const handleDeleteCarouselImage = async (id: string) => {
+    await deleteCarouselImage(id);
     toast({ title: "Imagem excluída!" });
-    loadData();
+    await loadData();
   };
 
   const handleCarouselImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -672,25 +662,25 @@ const AdminPanel = () => {
     }
   };
 
-  const handleMoveCarouselImageUp = (imageId: string) => {
+  const handleMoveCarouselImageUp = async (imageId: string) => {
     const imageIds = carouselImages.map(img => img.id);
     const index = imageIds.indexOf(imageId);
     if (index <= 0) return;
 
     [imageIds[index - 1], imageIds[index]] = [imageIds[index], imageIds[index - 1]];
-    updateCarouselImagePositions(imageIds);
-    loadData();
+    await updateCarouselImagePositions(imageIds);
+    await loadData();
     toast({ title: "Ordem atualizada!" });
   };
 
-  const handleMoveCarouselImageDown = (imageId: string) => {
+  const handleMoveCarouselImageDown = async (imageId: string) => {
     const imageIds = carouselImages.map(img => img.id);
     const index = imageIds.indexOf(imageId);
     if (index === -1 || index >= imageIds.length - 1) return;
 
     [imageIds[index], imageIds[index + 1]] = [imageIds[index + 1], imageIds[index]];
-    updateCarouselImagePositions(imageIds);
-    loadData();
+    await updateCarouselImagePositions(imageIds);
+    await loadData();
     toast({ title: "Ordem atualizada!" });
   };
 
@@ -717,7 +707,7 @@ const AdminPanel = () => {
       }
 
       if (editingInstitutionalBlock) {
-        updateInstitutionalBlock(editingInstitutionalBlock, {
+        await updateInstitutionalBlock(editingInstitutionalBlock, {
           title: institutionalBlockForm.title,
           link_url: institutionalBlockForm.link_url,
           image_url: imageUrl,
@@ -725,7 +715,7 @@ const AdminPanel = () => {
         toast({ title: "Bloco atualizado!" });
         setEditingInstitutionalBlock(null);
       } else {
-        addInstitutionalBlock({
+        await addInstitutionalBlock({
           title: institutionalBlockForm.title,
           link_url: institutionalBlockForm.link_url,
           image_url: imageUrl,
@@ -736,7 +726,7 @@ const AdminPanel = () => {
 
       setInstitutionalBlockForm({ title: "", link_url: "", image: null });
       setInstitutionalBlockImagePreview(null);
-      loadData();
+      await loadData();
     } catch (error) {
       toast({ title: "Erro ao salvar bloco", variant: "destructive" });
     } finally {
@@ -751,8 +741,7 @@ const AdminPanel = () => {
       link_url: block.link_url,
       image: null,
     });
-    const url = await getImageFromIDB(block.image_url);
-    setInstitutionalBlockImagePreview(url || block.image_url);
+    setInstitutionalBlockImagePreview(block.image_url);
   };
 
   const handleCancelEditInstitutionalBlock = () => {
@@ -761,8 +750,8 @@ const AdminPanel = () => {
     setInstitutionalBlockImagePreview(null);
   };
 
-  const handleDeleteInstitutionalBlock = (id: string) => {
-    deleteInstitutionalBlock(id);
+  const handleDeleteInstitutionalBlock = async (id: string) => {
+    await deleteInstitutionalBlock(id);
     toast({ title: "Bloco excluído!" });
     loadData();
   };
@@ -775,25 +764,25 @@ const AdminPanel = () => {
     }
   };
 
-  const handleMoveInstitutionalBlockUp = (blockId: string) => {
+  const handleMoveInstitutionalBlockUp = async (blockId: string) => {
     const blockIds = institutionalBlocks.map(b => b.id);
     const index = blockIds.indexOf(blockId);
     if (index <= 0) return;
 
     [blockIds[index - 1], blockIds[index]] = [blockIds[index], blockIds[index - 1]];
-    updateInstitutionalBlockPositions(blockIds);
-    loadData();
+    await updateInstitutionalBlockPositions(blockIds);
+    await loadData();
     toast({ title: "Ordem atualizada!" });
   };
 
-  const handleMoveInstitutionalBlockDown = (blockId: string) => {
+  const handleMoveInstitutionalBlockDown = async (blockId: string) => {
     const blockIds = institutionalBlocks.map(b => b.id);
     const index = blockIds.indexOf(blockId);
     if (index === -1 || index >= blockIds.length - 1) return;
 
     [blockIds[index], blockIds[index + 1]] = [blockIds[index + 1], blockIds[index]];
-    updateInstitutionalBlockPositions(blockIds);
-    loadData();
+    await updateInstitutionalBlockPositions(blockIds);
+    await loadData();
     toast({ title: "Ordem atualizada!" });
   };
 
