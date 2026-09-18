@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 345 20% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 345 20% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 345 20% 20%;
+
+    --primary: 332 45% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 25% 95%;
+    --secondary-foreground: 345 20% 20%;
+
+    --muted: 35 10% 94%;
+    --muted-foreground: 345 10% 50%;
+
+    --accent: 332 45% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 332 45% 25%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 345 20% 30%;
+    --sidebar-primary: 345 65% 45%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 35 25% 95%;
+    --sidebar-accent-foreground: 345 30% 15%;
+    --sidebar-border: 35 20% 88%;
+    --sidebar-ring: 345 65% 45%;
+  }
+
+  .dark {
+    --background: 345 20% 10%;
+    --foreground: 35 20% 95%;
+
+    --card: 345 20% 12%;
+    --card-foreground: 35 20% 95%;
+
+    --popover: 345 20% 12%;
+    --popover-foreground: 35 20% 95%;
+
+    --primary: 345 65% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 345 15% 20%;
+    --secondary-foreground: 35 20% 95%;
+
+    --muted: 345 15% 18%;
+    --muted-foreground: 35 15% 65%;
+
+    --accent: 25 70% 50%;
+    --accent-foreground: 35 20% 95%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 35 20% 95%;
+
+    --border: 345 15% 25%;
+    --input: 345 15% 25%;
+    --ring: 345 65% 55%;
+    
+    --sidebar-background: 345 20% 10%;
+    --sidebar-foreground: 35 20% 90%;
+    --sidebar-primary: 345 65% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 345 15% 18%;
+    --sidebar-accent-foreground: 35 20% 90%;
+    --sidebar-border: 345 15% 20%;
+    --sidebar-ring: 345 65% 55%;
+  }
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 20s linear infinite;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
