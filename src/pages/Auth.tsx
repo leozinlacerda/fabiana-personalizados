@@ -120,14 +120,6 @@ const Auth = () => {
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Entrar"}
                   </Button>
                 </form>
-                
-                <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground text-center">
-                    <strong>Credenciais padrão:</strong><br />
-                    Email: admin@fabiana.com<br />
-                    Senha: admin
-                  </p>
-                </div>
               </>
             )}
             

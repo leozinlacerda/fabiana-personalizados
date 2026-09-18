@@ -106,14 +106,6 @@ const AdminLogin = () => {
             )}
           </Button>
         </form>
-
-        <div className="mt-6 p-4 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground text-center">
-            <strong>Credenciais padrão:</strong><br />
-            Usuário: admin<br />
-            Senha: admin
-          </p>
-        </div>
       </div>
     </div>
   );
