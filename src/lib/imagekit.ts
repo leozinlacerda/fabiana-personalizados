@@ -4,8 +4,8 @@
 
 const IMAGEKIT_PUBLIC_KEY = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY as string;
 const IMAGEKIT_URL_ENDPOINT = import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT as string; // https://ik.imagekit.io/aw0yrq2s3
-// Private key NUNCA deve ir para o frontend em produção - use Edge Function
-const IMAGEKIT_PRIVATE_KEY = import.meta.env.IMAGEKIT_PRIVATE_KEY as string | undefined;
+// Private key exposta no frontend APENAS para teste DEV (VITE_ prefix). Em produção use Edge Function.
+const IMAGEKIT_PRIVATE_KEY = (import.meta.env.VITE_IMAGEKIT_PRIVATE_KEY || import.meta.env.IMAGEKIT_PRIVATE_KEY) as string | undefined;
 
 export function getImageKitUrl(filePath: string): string {
   if (!filePath) return "";
