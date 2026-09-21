@@ -1821,9 +1821,9 @@ const AdminPanel = () => {
 
           {/* WHATSAPP */}
           <TabsContent value="whatsapp" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
               {/* Formulário de Configuração - Esquerda */}
-              <div className="lg:col-span-3 p-4 sm:p-6 bg-card rounded-lg space-y-5">
+              <div className="flex-1 min-w-0 p-4 sm:p-6 bg-card rounded-lg space-y-5">
                 <div>
                   <h2 className="text-lg sm:text-xl font-serif font-semibold">
                     Configurar Mensagem do WhatsApp
@@ -1905,7 +1905,7 @@ const AdminPanel = () => {
               </div>
 
               {/* Preview - Celular com WhatsApp - Direita */}
-              <div className="lg:col-span-2 flex flex-col items-center lg:sticky lg:top-4">
+              <div className="w-full md:w-[300px] flex-shrink-0 flex flex-col items-center md:sticky md:top-4">
                 <p className="text-xs text-muted-foreground mb-4 font-medium uppercase tracking-wider">Pré-visualização</p>
                 
                 {/* Celular */}
