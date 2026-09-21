@@ -86,7 +86,15 @@ const ProductDetail = () => {
     if (!product) return;
     
     const finalPrice = calculateFinalPrice();
-    const message = `Olá! Gostaria de encomendar:\n\n*${product.name}*\nQuantidade: ${quantity}${selectedSize ? `\nTamanho: ${selectedSize}` : ''}\nPreço: R$ ${(finalPrice * quantity).toFixed(2)}`;
+    
+    // Use the template from settings if available
+    const template = siteSettings?.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}';
+    
+    const message = template
+      .replace('{produto}', product.name)
+      .replace('{quantidade}', quantity.toString())
+      .replace('{tamanho}', selectedSize ? `\nTamanho: ${selectedSize}\n` : '\n')
+      .replace('{preco}', (finalPrice * quantity).toFixed(2));
     
     const whatsappNumber = (siteSettings?.whatsapp_number || '5511999999999').replace(/\D/g, "");
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;

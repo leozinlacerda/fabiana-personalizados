@@ -56,6 +56,7 @@ export interface SiteSettings {
   accent_color: string;
   button_size: 'sm' | 'md' | 'lg';
   button_border_radius: string;
+  whatsapp_message_template: string;
 }
 export interface CarouselImage {
   id: string;
@@ -85,6 +86,7 @@ const defaultSettings: SiteSettings = {
   accent_color: '#C4A77D',
   button_size: 'md',
   button_border_radius: '4',
+  whatsapp_message_template: 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}',
 };
 
 // Helpers
@@ -260,6 +262,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     accent_color: data.accent_color ?? defaultSettings.accent_color,
     button_size: (data.button_size as any) ?? defaultSettings.button_size,
     button_border_radius: data.button_border_radius ?? defaultSettings.button_border_radius,
+    whatsapp_message_template: data.whatsapp_message_template ?? defaultSettings.whatsapp_message_template,
   };
 }
 export async function updateSiteSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
