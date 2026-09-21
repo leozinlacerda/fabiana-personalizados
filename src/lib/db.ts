@@ -86,7 +86,7 @@ const defaultSettings: SiteSettings = {
   accent_color: '#C4A77D',
   button_size: 'md',
   button_border_radius: '4',
-  whatsapp_message_template: 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}\n\n.Link do produto: {link}',
+  whatsapp_message_template: 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {valor_final}\n\nLink do produto: {link}',
 };
 
 // Helpers

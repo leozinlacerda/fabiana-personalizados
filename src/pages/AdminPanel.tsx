@@ -85,7 +85,7 @@ const AdminPanel = () => {
     accent_color: '#C4A77D',
     button_size: 'md',
     button_border_radius: '4',
-    whatsapp_message_template: 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}\n\nLink do produto: {link}',
+    whatsapp_message_template: 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {valor_final}\n\nLink do produto: {link}',
   });
   
   // Editing states
@@ -1874,8 +1874,8 @@ const AdminPanel = () => {
                         <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Tamanho (oculto se não houver)</span>
                       </div>
                       <div className="flex items-start gap-2.5 bg-background rounded-lg p-2.5 border">
-                        <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{preco}'}</code>
-                        <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Preço final formatado</span>
+                        <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{valor_final}'}</code>
+                        <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Preço × quantidade</span>
                       </div>
                       <div className="flex items-start gap-2.5 bg-background rounded-lg p-2.5 border">
                         <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{link}'}</code>
@@ -1962,12 +1962,12 @@ const AdminPanel = () => {
                           {/* Conteúdo da mensagem */}
                           <div className="text-[12px] text-[#111b21] leading-[1.4] whitespace-pre-line">
                             {(() => {
-                              const template = siteSettings.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}\n\nLink do produto: {link}';
+                              const template = siteSettings.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {valor_final}\n\nLink do produto: {link}';
                               const exampleMessage = template
                                 .replace('{produto}', 'Vestido de Renda Dourada')
                                 .replace('{quantidade}', '1')
                                 .replace('{tamanho}', '\nTamanho: M\n')
-                                .replace('{preco}', '189,90')
+                                .replace('{valor_final}', '189,90')
                                 .replace('{link}', 'https://fabiana.com/produto/123')
                                 .replace('{categoria}', 'Vestidos')
                                 .replace('{descricao}', 'Vestido elegante de renda, perfeito para ocasiões especiais.');

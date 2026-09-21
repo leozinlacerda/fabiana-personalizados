@@ -92,13 +92,13 @@ const ProductDetail = () => {
     const categoryName = categories.find(c => c.id === product.category_id)?.name || '';
     
     // Use the template from settings if available
-    const template = siteSettings?.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}\n\nLink do produto: {link}';
+    const template = siteSettings?.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {valor_final}\n\nLink do produto: {link}';
     
     const message = template
       .replace('{produto}', product.name)
       .replace('{quantidade}', quantity.toString())
       .replace('{tamanho}', selectedSize ? `\nTamanho: ${selectedSize}\n` : '\n')
-      .replace('{preco}', (finalPrice * quantity).toFixed(2))
+      .replace('{valor_final}', (finalPrice * quantity).toFixed(2))
       .replace('{link}', productLink)
       .replace('{categoria}', categoryName)
       .replace('{descricao}', product.description || '');
