@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronUp, ChevronDown, Plus, Minus, Truck, CreditCard, Share2, Facebook, Twitter, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getProductById, getProductImagesByProductId, getSiteSettings, getProducts, Product, ProductImage, SiteSettings } from "@/lib/db";
+import { getProductById, getProductImagesByProductId, getSiteSettings, getProducts, getCategories, Product, ProductImage, SiteSettings, Category } from "@/lib/db";
 import Lightbox from "@/components/Lightbox";
 
 const ProductDetail = () => {
@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [shippingOpen, setShippingOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -33,6 +34,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     getSiteSettings().then(setSiteSettings);
+    getCategories().then(setCategories);
     if (id) {
       loadProduct();
     }
@@ -86,15 +88,20 @@ const ProductDetail = () => {
     if (!product) return;
     
     const finalPrice = calculateFinalPrice();
+    const productLink = `${window.location.origin}/produto/${product.id}`;
+    const categoryName = categories.find(c => c.id === product.category_id)?.name || '';
     
     // Use the template from settings if available
-    const template = siteSettings?.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}';
+    const template = siteSettings?.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}\n\nLink do produto: {link}';
     
     const message = template
       .replace('{produto}', product.name)
       .replace('{quantidade}', quantity.toString())
       .replace('{tamanho}', selectedSize ? `\nTamanho: ${selectedSize}\n` : '\n')
-      .replace('{preco}', (finalPrice * quantity).toFixed(2));
+      .replace('{preco}', (finalPrice * quantity).toFixed(2))
+      .replace('{link}', productLink)
+      .replace('{categoria}', categoryName)
+      .replace('{descricao}', product.description || '');
     
     const whatsappNumber = (siteSettings?.whatsapp_number || '5511999999999').replace(/\D/g, "");
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
