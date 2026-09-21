@@ -1821,59 +1821,66 @@ const AdminPanel = () => {
 
           {/* WHATSAPP */}
           <TabsContent value="whatsapp" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Formulário de Configuração */}
-              <div className="p-4 sm:p-6 bg-card rounded-lg space-y-4">
-                <h2 className="text-lg sm:text-xl font-serif font-semibold">
-                  Configurar Mensagem do WhatsApp
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Configure a mensagem que será enviada quando um cliente clicar para encomendar via WhatsApp.
-                </p>
-
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+              {/* Formulário de Configuração - Esquerda */}
+              <div className="lg:col-span-3 p-4 sm:p-6 bg-card rounded-lg space-y-5">
                 <div>
-                  <Label htmlFor="whatsappNumber" className="text-sm">Número do WhatsApp</Label>
-                  <Input
-                    id="whatsappNumber"
-                    value={siteSettings.whatsapp_number}
-                    onChange={(e) => setSiteSettings({ ...siteSettings, whatsapp_number: e.target.value })}
-                    placeholder="5511999999999"
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Formato: código do país + DDD + número</p>
+                  <h2 className="text-lg sm:text-xl font-serif font-semibold">
+                    Configurar Mensagem do WhatsApp
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Configure a mensagem enviada quando um cliente clica para encomendar.
+                  </p>
                 </div>
 
-                <div>
-                  <Label htmlFor="whatsappTemplate" className="text-sm">Modelo da Mensagem</Label>
-                  <Textarea
-                    id="whatsappTemplate"
-                    value={siteSettings.whatsapp_message_template}
-                    onChange={(e) => setSiteSettings({ ...siteSettings, whatsapp_message_template: e.target.value })}
-                    rows={6}
-                    className="mt-1 font-mono text-sm"
-                  />
-                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="whatsappNumber" className="text-sm font-medium">Número do WhatsApp</Label>
+                    <Input
+                      id="whatsappNumber"
+                      value={siteSettings.whatsapp_number}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, whatsapp_number: e.target.value })}
+                      placeholder="5511999999999"
+                      className="mt-1.5"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">Código do país + DDD + número (ex: 5511999999999)</p>
+                  </div>
 
-                {/* Placeholders */}
-                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">Variáveis disponíveis:</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <code className="bg-background px-1.5 py-0.5 rounded text-[11px] font-mono border">{'{produto}'}</code>
-                      <span className="text-muted-foreground">→ Nome do produto</span>
+                  <div>
+                    <Label htmlFor="whatsappTemplate" className="text-sm font-medium">Modelo da Mensagem</Label>
+                    <Textarea
+                      id="whatsappTemplate"
+                      value={siteSettings.whatsapp_message_template}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, whatsapp_message_template: e.target.value })}
+                      rows={7}
+                      className="mt-1.5 font-mono text-sm leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Placeholders */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variáveis disponíveis</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex items-start gap-2.5 bg-background rounded-lg p-2.5 border">
+                        <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{produto}'}</code>
+                        <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Nome do produto</span>
+                      </div>
+                      <div className="flex items-start gap-2.5 bg-background rounded-lg p-2.5 border">
+                        <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{quantidade}'}</code>
+                        <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Quantidade escolhida</span>
+                      </div>
+                      <div className="flex items-start gap-2.5 bg-background rounded-lg p-2.5 border">
+                        <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{tamanho}'}</code>
+                        <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Tamanho (oculto se não houver)</span>
+                      </div>
+                      <div className="flex items-start gap-2.5 bg-background rounded-lg p-2.5 border">
+                        <code className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-mono font-bold shrink-0">{'{preco}'}</code>
+                        <span className="text-[11px] text-muted-foreground leading-tight pt-0.5">Preço final formatado</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-background px-1.5 py-0.5 rounded text-[11px] font-mono border">{'{quantidade}'}</code>
-                      <span className="text-muted-foreground">→ Qtd. escolhida</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-background px-1.5 py-0.5 rounded text-[11px] font-mono border">{'{tamanho}'}</code>
-                      <span className="text-muted-foreground">→ Tamanho (se houver)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-background px-1.5 py-0.5 rounded text-[11px] font-mono border">{'{preco}'}</code>
-                      <span className="text-muted-foreground">→ Preço final</span>
-                    </div>
+                    <p className="text-[10px] text-muted-foreground italic">
+                      Use *texto* para colocar em negrito. Use \n para quebrar linha.
+                    </p>
                   </div>
                 </div>
 
@@ -1897,34 +1904,34 @@ const AdminPanel = () => {
                 </Button>
               </div>
 
-              {/* Preview - Celular com WhatsApp */}
-              <div className="flex flex-col items-center">
-                <p className="text-xs text-muted-foreground mb-3 font-medium">Pré-visualização:</p>
+              {/* Preview - Celular com WhatsApp - Direita */}
+              <div className="lg:col-span-2 flex flex-col items-center lg:sticky lg:top-4">
+                <p className="text-xs text-muted-foreground mb-4 font-medium uppercase tracking-wider">Pré-visualização</p>
                 
                 {/* Celular */}
-                <div className="relative w-[280px] h-[560px] bg-[#1a1a2e] rounded-[36px] p-[10px] shadow-2xl border-4 border-gray-700">
+                <div className="relative w-[260px] h-[480px] bg-[#111b21] rounded-[32px] p-[8px] shadow-2xl">
                   {/* Tela */}
-                  <div className="w-full h-full bg-[#e5ddd5] rounded-[28px] overflow-hidden flex flex-col">
+                  <div className="w-full h-full bg-[#efeae2] rounded-[26px] overflow-hidden flex flex-col">
                     
                     {/* Barra superior WhatsApp */}
-                    <div className="bg-[#075e54] px-3 py-2 flex items-center gap-2">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-[#008069] px-3 py-2.5 flex items-center gap-2.5">
+                      <svg className="w-4 h-4 text-white/80" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                       </svg>
-                      <div className="w-8 h-8 rounded-full bg-[#075e54] flex items-center justify-center border border-white/30">
-                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="w-9 h-9 rounded-full bg-[#d9dbdc] flex items-center justify-center shrink-0">
+                        <svg className="w-6 h-6 text-[#5e6c74]" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
                         </svg>
                       </div>
-                      <div className="flex-1 ml-1">
-                        <p className="text-white text-xs font-medium">Fabiana Designs</p>
-                        <p className="text-white/60 text-[9px]">online</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-[13px] font-medium leading-tight truncate">Fabiana Designs</p>
+                        <p className="text-white/70 text-[10px] leading-tight">online</p>
                       </div>
-                      <div className="flex gap-3">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="flex gap-3.5 shrink-0">
+                        <svg className="w-[18px] h-[18px] text-white/80" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
                         </svg>
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-[18px] h-[18px] text-white/80" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                         </svg>
                       </div>
@@ -1932,16 +1939,16 @@ const AdminPanel = () => {
 
                     {/* Área de mensagens */}
                     <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                     }}>
                       {/* Mensagem do WhatsApp */}
                       <div className="flex justify-end">
-                        <div className="bg-[#dcf8c6] rounded-lg rounded-tr-sm p-2.5 max-w-[85%] shadow-sm relative">
+                        <div className="bg-[#d9fdd3] rounded-lg rounded-tr-sm px-2.5 py-1.5 max-w-[88%] shadow-sm relative">
                           {/* Seta da mensagem */}
-                          <div className="absolute top-0 right-[-6px] w-0 h-0 border-t-[6px] border-t-[#dcf8c6] border-l-[6px] border-l-transparent border-r-0 border-b-0" />
+                          <div className="absolute top-0 right-[-5px] w-0 h-0 border-t-[5px] border-t-[#d9fdd3] border-l-[5px] border-l-transparent" />
                           
                           {/* Conteúdo da mensagem */}
-                          <div className="text-[11px] text-[#303030] leading-relaxed whitespace-pre-line">
+                          <div className="text-[12px] text-[#111b21] leading-[1.4] whitespace-pre-line">
                             {(() => {
                               const template = siteSettings.whatsapp_message_template || 'Olá! Gostaria de encomendar:\n\n*{produto}*\nQuantidade: {quantidade}{tamanho}Preço: R$ {preco}';
                               const exampleMessage = template
@@ -1950,7 +1957,6 @@ const AdminPanel = () => {
                                 .replace('{tamanho}', '\nTamanho: M\n')
                                 .replace('{preco}', '189,90');
                               
-                              // Renderizar com negrito para texto entre *
                               return exampleMessage.split('\n').map((line, i) => {
                                 if (line.includes('*')) {
                                   const parts = line.split('*');
@@ -1962,15 +1968,15 @@ const AdminPanel = () => {
                                     </div>
                                   );
                                 }
-                                return <div key={i}>{line}</div>;
+                                return <div key={i}>{line || '\u00A0'}</div>;
                               });
                             })()}
                           </div>
                           
-                          {/* Hora da mensagem */}
-                          <div className="flex items-center justify-end gap-1 mt-1">
-                            <span className="text-[9px] text-[#8696a0]">14:32</span>
-                            <svg className="w-3 h-3 text-[#53bdeb]" viewBox="0 0 16 11" fill="currentColor">
+                          {/* Hora e check */}
+                          <div className="flex items-center justify-end gap-0.5 mt-0.5">
+                            <span className="text-[10px] text-[#667781]">14:32</span>
+                            <svg className="w-[14px] h-[14px] text-[#53bdeb] ml-0.5" viewBox="0 0 16 11" fill="currentColor">
                               <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.381.178l-6.19 7.636-2.011-2.095a.46.46 0 0 0-.659-.003.464.464 0 0 0-.003.66l2.407 2.507a.46.46 0 0 0 .662.031l6.566-8.103a.448.448 0 0 0-.087-.709z"/>
                             </svg>
                           </div>
@@ -1979,29 +1985,26 @@ const AdminPanel = () => {
                     </div>
 
                     {/* Barra inferior */}
-                    <div className="bg-[#f0f0f0] px-2 py-2 flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center">
+                    <div className="bg-[#f0f2f5] px-2 py-2 flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
                         <svg className="w-5 h-5 text-[#8696a0]" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9.5 11c.83 0 1.5-.67 1.5-1.5S10.33 8 9.5 8 8 8.67 8 9.5 8.67 11 9.5 11zm5 0c.83 0 1.5-.67 1.5-1.5S15.33 8 14.5 8 13 8.67 13 9.5s.67 1.5 1.5 1.5zm4.5 1.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5 1.5-.67 1.5-1.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                          <path d="M12 15c1.66 0 2.99-1.34 2.99-3L15 6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 15 6.7 12H5c0 3.41 2.72 6.23 6 6.72V22h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
                         </svg>
                       </div>
-                      <div className="flex-1 bg-white rounded-full px-3 py-1.5">
-                        <span className="text-[10px] text-[#8696a0]">Digite uma mensagem</span>
+                      <div className="flex-1 bg-white rounded-full px-3 py-2 border border-[#e4e6e8]">
+                        <span className="text-[11px] text-[#667781]">Mensagem</span>
                       </div>
-                      <div className="w-7 h-7 rounded-full bg-[#075e54] flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                        <svg className="w-5 h-5 text-[#8696a0]" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                         </svg>
                       </div>
                     </div>
                   </div>
-
-                  {/* Notch */}
-                  <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-20 h-5 bg-gray-800 rounded-b-xl" />
                 </div>
 
-                <p className="text-[10px] text-muted-foreground mt-3 text-center max-w-[260px]">
-                  Assim o cliente verá a mensagem ao clicar em "Encomendar"
+                <p className="text-[11px] text-muted-foreground mt-4 text-center max-w-[260px] leading-relaxed">
+                  Assim o cliente verá a mensagem ao clicar em <strong>"Encomendar"</strong>
                 </p>
               </div>
             </div>
